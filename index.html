@@ -10,6 +10,61 @@
   <body>
     <main>
     </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script>
+      let ball;
+      let x, y;
+
+      function setup() {
+        createCanvas(windowWidth, windowHeight);
+        let button = createButton('ジャイロスコープの許可を取得');
+        button.position(10, 10);
+        button.mousePressed(requestAccess);
+
+        // ボールの初期位置をキャンバスの中心に設定
+        x = width / 2;
+        y = height / 2;
+
+        ball = {
+          x: x,
+          y: y,
+          diameter: 50
+        };
+      }
+
+      function requestAccess() {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+          DeviceOrientationEvent.requestPermission()
+            .then(response => {
+              if (response === 'granted') {
+                // 権限が与えられた場合、deviceorientationを有効にする
+                window.addEventListener('deviceorientation', handleOrientation);
+              } else {
+                alert('デバイスの傾き情報へのアクセスが拒否されました。');
+              }
+            })
+            .catch(console.error);
+        } else {
+          // iOS 13未満やAndroidの場合
+          window.addEventListener('deviceorientation', handleOrientation);
+        }
+      }
+
+      function handleOrientation(event) {
+        let beta = event.beta;   // デバイスの傾き（X軸）
+        let gamma = event.gamma; // デバイスの傾き（Y軸）
+
+        // ボールの位置を更新
+        ball.x = map(gamma, -90, 90, 0, width);
+        ball.y = map(beta, -180, 180, 0, height);
+      }
+
+      function draw() {
+        background(200);
+        fill(0);
+        ellipse(ball.x, ball.y, ball.diameter, ball.diameter);
+      }
+    </script>
     <script src="sketch.js"></script>
   </body>
 </html>
